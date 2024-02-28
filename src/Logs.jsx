@@ -1,13 +1,17 @@
-import { useEffect } from "react";
+import { Link, useParams } from "react-router-dom";
 
-const Logs = ({ logs, setLogs, setToggleDetails }) => {
-  useEffect(() => {
-    fetch("http://localhost:8888/logs")
+const Logs = ({ logs, setLogs, setToggleDetails, setEdit }) => {
+  const { id } = useParams();
+  if (logs.length === 0) return null;
+
+  const handleDelete = (id) => {
+    const options = {
+      method: "DELETE",
+    };
+    fetch(`http://localhost:8888/logs/${id}`, options)
       .then((res) => res.json())
       .then((data) => setLogs(data.logs));
-  }, []);
-
-  if (logs.length === 0) return null;
+  };
 
   return (
     <div>
@@ -17,9 +21,13 @@ const Logs = ({ logs, setLogs, setToggleDetails }) => {
           <h3>Captain Name: {captainName}</h3>
           <p>Title: {title}</p>
           <p>Post: {post}</p>
-          <button onClick={() => setToggleDetails({ show: true, id })}>
-            Details
-          </button>
+          <Link to={`/${id}`}>
+            <button>Details</button>
+          </Link>
+          <Link to={`/edit/${id}`}>
+            <button>Edit</button>
+          </Link>
+          <button onClick={() => handleDelete(id)}>Delete</button>
           <hr />
         </div>
       ))}

@@ -1,7 +1,7 @@
-import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-const LogForm = ({ setLogs }) => {
+const LogEdit = ({ setLogs }) => {
   const [log, setLog] = useState({
     captainName: "",
     title: "",
@@ -10,35 +10,34 @@ const LogForm = ({ setLogs }) => {
     daysSinceLastCrisis: 0,
   });
   const navigate = useNavigate();
+  const { id } = useParams();
+
   const handleChange = (e) => {
     setLog({ ...log, [e.target.id]: e.target.value });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const options = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(log),
-    };
-    fetch("http://localhost:8888/logs", options)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.message) alert("All inputs must be filled");
-        else {
-          setLogs(data.logs);
-          setLog({
-            captainName: "",
-            title: "",
-            post: "",
-            mistakesWereMadeToday: false,
-            daysSinceLastCrisis: 0,
-          });
-          navigate("/");
-        }
-      })
-      .catch((err) => console.log(err));
+    if (id) {
+      const options = {
+        method: "PUT",
+        headers: { "Content-type": "application/json" },
+        body: JSON.stringify(log),
+      };
+      fetch(`http://localhost:8888/logs/${id}`, options)
+        .then((res) => res.json())
+        .then((data) => setLogs(data.logs))
+        .then(() => navigate("/"));
+    }
   };
+
+  useEffect(() => {
+    if (id) {
+      fetch(`http://localhost:8888/logs/${id}`)
+        .then((res) => res.json())
+        .then((data) => setLog(data.log));
+    }
+  }, [id]);
 
   return (
     <div>
@@ -52,7 +51,7 @@ const LogForm = ({ setLogs }) => {
             id="captainName"
             name="captainName"
             value={log.captainName}
-            // required
+            required
           />
         </label>
         <label htmlFor="title">
@@ -63,7 +62,7 @@ const LogForm = ({ setLogs }) => {
             id="title"
             name="title"
             value={log.title}
-            // required
+            required
           />
         </label>
         <label htmlFor="post">
@@ -74,7 +73,7 @@ const LogForm = ({ setLogs }) => {
             id="post"
             name="post"
             value={log.post}
-            // required
+            required
           />
         </label>
         <label htmlFor="mistakesWereMadeToday">
@@ -85,7 +84,7 @@ const LogForm = ({ setLogs }) => {
             id="mistakesWereMadeToday"
             name="mistakesWereMadeToday"
             value={log.mistakesWereMadeToday}
-            // required
+            required
           />
         </label>
         <label htmlFor="daysSinceLastCrisis">
@@ -96,7 +95,7 @@ const LogForm = ({ setLogs }) => {
             id="daysSinceLastCrisis"
             name="daysSinceLastCrisis"
             value={log.daysSinceLastCrisis}
-            // required
+            required
           />
         </label>
         <button>Submit</button>
@@ -108,4 +107,4 @@ const LogForm = ({ setLogs }) => {
   );
 };
 
-export default LogForm;
+export default LogEdit;
